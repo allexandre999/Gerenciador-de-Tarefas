@@ -12,7 +12,13 @@ Este é um sistema completo de gerenciamento de tarefas que se integra com o Goo
 - ✅ **Autenticação dupla**
   - Login tradicional com email/senha
   - Login rápido com conta Google
-  
+ 
+- 📝 **Gestão de tarefas no Back4App**
+  - CRUD completo de tarefas usando Parse SDK
+  - Armazenamento persistente no banco de dados do Back4App
+  - Consultas otimizadas com Parse.Query
+  - Back4App como fonte principal de dados
+    
 - 📝 **Gestão de tarefas completa**
   - Adição de tarefas com título, descrição, prazo, prioridade e responsável
   - Atualização de status (Em andamento/Concluída)
