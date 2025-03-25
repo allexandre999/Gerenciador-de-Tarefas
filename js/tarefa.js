@@ -83,15 +83,14 @@ function displayEvents(events) {
 
 
 // Função para criar evento no Google Calendar
-async function createGoogleCalendarEvent(
-  taskTitle,
-  taskDescription,
-  taskDeadline
-) {
+async function createGoogleCalendarEvent(taskTitle, taskDescription, taskDeadline) {
   try {
-    // Verifica se a API do Google Calendar foi carregada
-    if (!gapi.client.calendar) {
-      throw new Error("API do Google Calendar não foi carregada corretamente.");
+    // Verifica se temos um token de acesso válido
+    const accessToken = localStorage.getItem("googleAccessToken");
+    if (!accessToken) {
+      // Se não tiver token, solicita autenticação
+      await authenticateGoogle();
+      return await createGoogleCalendarEvent(taskTitle, taskDescription, taskDeadline); // Tenta novamente
     }
 
     const event = {
@@ -102,23 +101,36 @@ async function createGoogleCalendarEvent(
         timeZone: "America/Sao_Paulo",
       },
       end: {
-        dateTime: new Date(taskDeadline).toISOString(),
+        dateTime: new Date(new Date(taskDeadline).getTime() + 60 * 60 * 1000).toISOString(), // +1 hora
         timeZone: "America/Sao_Paulo",
       },
     };
 
-    const response = await gapi.client.calendar.events.insert({
-      calendarId: "primary",
-      resource: event,
+    const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(event),
     });
 
-    console.log("Evento criado no Google Calendar:", response);
-    alert("Evento adicionado ao Google Calendar!");
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (response.status === 401) {
+        // Token pode estar expirado - tenta renovar
+        localStorage.removeItem("googleAccessToken");
+        return await createGoogleCalendarEvent(taskTitle, taskDescription, taskDeadline);
+      }
+      throw new Error(errorData.error?.message || "Erro ao criar evento");
+    }
+
+    const data = await response.json();
+    console.log("Evento criado no Google Calendar:", data);
+    return data;
   } catch (error) {
     console.error("Erro ao criar evento no Google Calendar:", error);
-    alert(
-      "Erro ao criar evento no Google Calendar. Verifique se você está autenticado."
-    );
+    throw error;
   }
 }
 
@@ -137,27 +149,27 @@ const TaskManager = (() => {
     const currentUser = Parse.User.current();
   
     if (idToken) {
-      // Autenticação via Google
       try {
-        const user = await Parse.Cloud.run('googleLogin', { idToken });
-        if (!user) {
-          console.error("Usuário não autenticado no Parse Server.");
-          window.location.href = "index.html";
-          return null;
+        // Verifica se já temos um usuário Parse vinculado a este token
+        if (!currentUser) {
+          const user = await Parse.Cloud.run('googleLogin', { idToken });
+          if (!user) {
+            console.error("Usuário não autenticado no Parse Server.");
+            window.location.href = "index.html";
+            return null;
+          }
+          return user;
         }
-        console.error("Usuário autenticado com sucesso no Parse Server.");
-        return user;
+        return currentUser;
       } catch (error) {
         console.error("Erro ao autenticar com Google:", error);
         window.location.href = "index.html";
         return null;
       }
     } else if (currentUser) {
-      // Autenticação tradicional
       return currentUser;
     } else {
-      // Nenhum método de autenticação encontrado
-      console.error("Nenhum método de autenticação encontrado. O usuário pode estar deslogado.");
+      console.error("Nenhum método de autenticação encontrado.");
       window.location.href = "index.html";
       return null;
     }
@@ -253,19 +265,18 @@ const TaskManager = (() => {
   };
 
   return {
-    addTask: async (title, description, deadline, priority, responsible) => {
-      const user = await getCurrentUser(); // Aguarda a resolução da Promise
+    addTask: async (title, description, deadline, priority, responsible, saveToGoogle) => {
+      const user = await getCurrentUser();
       if (!user) {
         alert("Você precisa estar logado para adicionar tarefas.");
         return;
       }
-
-      // Validação dos campos
+    
       if (!title || !description || !deadline || !responsible) {
         alert("Preencha todos os campos corretamente.");
         return;
       }
-
+    
       const task = new Task();
       task.set("titulo", title);
       task.set("descricao", description);
@@ -274,18 +285,41 @@ const TaskManager = (() => {
       task.set("prioridade", priority);
       task.set("responsavel", responsible);
       task.set("owner", user);
-
+    
       try {
         await task.save();
         alert("Tarefa adicionada com sucesso!");
         renderTasks();
+    
+        // Salvar no Google Calendar apenas se o checkbox estiver marcado
+        if (saveToGoogle) {
+          const idToken = localStorage.getItem("googleIdToken");
+          if (idToken) {
+            try {
+              // Carrega a API se ainda não estiver carregada
+              if (!window.gapi) {
+                await new Promise((resolve) => {
+                  const script = document.createElement('script');
+                  script.src = 'https://apis.google.com/js/api.js';
+                  script.onload = resolve;
+                  document.head.appendChild(script);
+                });
+                await loadGoogleCalendarAPI();
+              }
 
-        // Criar evento no Google Calendar (se o usuário estiver autenticado via Google)
-        const idToken = localStorage.getItem("googleIdToken");
-        if (idToken) {
-          await createGoogleCalendarEvent(title, description, deadline);
+              if (!localStorage.getItem("googleAccessToken")) {
+                await authenticateGoogle();
+              }
+              
+              await createGoogleCalendarEvent(title, description, deadline);
+              alert("Tarefa também salva no Google Agenda!");
+            } catch (error) {
+              console.error("Erro ao salvar no Google Agenda:", error);
+              alert("Tarefa salva no sistema, mas não foi possível salvar no Google Agenda."+ error.message);
+            }
+          }
         }
-
+    
         resetForm();
       } catch (error) {
         console.error("Erro ao adicionar tarefa:", error.message);
@@ -343,6 +377,7 @@ document.getElementById("addTask").addEventListener("click", async () => {
   const deadline = document.getElementById("prazo").value;
   const priority = document.getElementById("prioridade").value;
   const responsible = document.getElementById("responsavel").value.trim();
+  const saveToGoogle = document.getElementById("saveToGoogleCalendar").checked;
 
   // Validação dos campos
   const errorMessage = validateFields(
@@ -362,7 +397,8 @@ document.getElementById("addTask").addEventListener("click", async () => {
       description,
       deadline,
       priority,
-      responsible
+      responsible,
+      saveToGoogle
     );
   } catch (error) {
     console.error("Erro ao adicionar tarefa:", error.message);
@@ -415,8 +451,20 @@ function embedGoogleCalendar() {
   document.querySelector(".container").appendChild(calendarContainer);
 }
 
+function checkGoogleLoginAndShowOption() {
+  const idToken = localStorage.getItem("googleIdToken");
+  const googleOption = document.getElementById("googleCalendarOption");
+  
+  if (idToken) {
+    googleOption.style.display = "block";
+  } else {
+    googleOption.style.display = "none";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   updateSaudacao();
+  checkGoogleLoginAndShowOption();
   TaskManager.render();
 
   // Verifica se o idToken do Google está armazenado
@@ -431,13 +479,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (idToken) {
-      await loadGoogleCalendarAPI();
-
-      // Autentica o usuário no Google para obter o accessToken
-      await authenticateGoogle();
-
-      // Busca e exibe os eventos do Google Calendar
-      await fetchGoogleCalendarEvents();
+      try {
+        // Carrega a API do Google apenas se necessário
+        await new Promise((resolve) => {
+          if (window.gapi) return resolve();
+          
+          const script = document.createElement('script');
+          script.src = 'https://apis.google.com/js/api.js';
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+        
+        await loadGoogleCalendarAPI();
+      } catch (error) {
+        console.error("Erro ao carregar Google API:", error);
+      }
     }
   } catch (error) {
     console.error("Erro ao carregar Google API:", error);
