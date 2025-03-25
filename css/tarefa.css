@@ -1,0 +1,186 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f4f4f4;
+  padding: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  flex-wrap: wrap;
+}
+
+.navbar h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+  flex: 1;
+  text-align: center;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  cursor: pointer;
+  border-radius: 25px; /* Aumentei o raio para deixar mais arredondado */
+  font-size: 16px; /* Aumentei o tamanho da fonte para maior legibilidade */
+  text-transform: uppercase; /* Deixa o texto em maiúsculas */
+  letter-spacing: 1px; /* Adiciona um pequeno espaçamento entre as letras */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra suave ao botão */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Adiciona uma animação ao clique */
+}
+
+.logout-btn:hover {
+  background-color: #ff370f;
+  transform: translateY(-2px); /* Adiciona um efeito de "elevar" ao passar o mouse */
+}
+
+.logout-btn:active {
+  transform: translateY(1px); /* Faz o botão "afundar" um pouco quando pressionado */
+}
+
+
+/* Container */
+.container {
+  max-width: 80%;
+  margin: 20px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* Formulário */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form label {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.form input,
+.form select {
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+}
+
+button#addTask {
+  background-color: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 60%;
+  align-self: center; 
+  transition: background-color 0.3s ease;
+}
+
+button#addTask:hover {
+  background-color: #218838;
+}
+
+/* Tabela */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  overflow-x: auto; /* Para permitir rolagem horizontal em telas menores */
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+
+/* Telas entre 1024px e 768px */
+@media (max-width: 1024px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .container {
+    max-width: 90%;
+    padding: 15px;
+    margin: 10px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+
+  .delete-btn {
+    padding: 6px 12px;
+  }
+}
+

@@ -1,0 +1,78 @@
+
+<!-- task -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciador de Tarefas</title>
+  <link rel="stylesheet" href="css/tarefa.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/parse/3.4.4/parse.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>Gerenciador de Tarefas</h1>
+    <button id="logout" class="logout-btn">Sair</button>
+  </nav>
+
+  <div class="container">
+    <h1 id="saudacao">Seja bem-vindo, <span id="nomeUsuario">Usuário</span>!</h1>
+
+    <div class="form">
+      <label for="titulo">Nome da tarefa:</label>
+      <input type="text" id="titulo" placeholder="Nome da tarefa"required autocomplete="off">
+
+      <label for="descricao">Detalhes:</label>
+      <input type="text" id="descricao" placeholder="Detalhes"required autocomplete="off">
+
+      <label for="prazo">Prazo de entrega:</label>
+      <input type="date" id="prazo">
+
+      <label for="prioridade">Prioridade:</label>
+      <select id="prioridade">
+        <option>Baixa</option>
+        <option>Média</option>
+        <option>Alta</option>
+      </select>
+
+      <label for="responsavel">Responsável:</label>
+      <input type="text" id="responsavel" placeholder="Nome do responsável"required autocomplete="off">
+
+      <button id="addTask">Adicionar Tarefa</button>
+      <div id="message"></div>
+    </div>
+
+    <table id="taskTable">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Detalhes</th>
+          <th>Data Criação</th>
+          <th>Prazo</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Responsável</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+    <div id="calendarEvents">
+      <h2>Eventos do Google Calendar</h2>
+      <ul id="eventList"></ul>
+    </div>
+    
+  </div>
+
+  
+  <!-- Google Identity Services (GSI) para login -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Google API Client para acesso ao Google Calendar -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  
+  <script src="js/tarefa.js"></script>
+</body>
+
+</html>

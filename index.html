@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+    <meta http-equiv="Content-Security-Policy" content="
+    script-src 'self' https://apis.google.com https://www.gstatic.com https://cdnjs.cloudflare.com https://accounts.google.com https://www.googleapis.com 'unsafe-inline' 'unsafe-eval';
+    frame-src https://accounts.google.com https://www.googleapis.com;
+    connect-src 'self' https://accounts.google.com https://www.googleapis.com https://oauth2.googleapis.com https://parseapi.back4app.com ws://127.0.0.1:5502;
+    img-src 'self' https://www.gstatic.com https://www.google.com;">
+    <title>Gestor de Tarefas - Login</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="container-sm">
+        <h2 class="system-text text-center">Gestor de Tarefas</h2>
+
+        <!-- Login -->
+        <div id="loginSection" class="section active">
+            <img src="img/img1.png" alt="Sistema" class="system-img mx-auto d-block">
+            <h2 class="system-text text-center">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" class="form-control form-control-lg" id="email" placeholder="E-mail" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control form-control-lg" id="password" placeholder="Senha" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block" id="loginButton">Acessar Sistema</button>
+                <button type="button" class="btn btn-secondary btn-lg btn-block" id="showRegisterButton">Cadastrar</button>
+            </form>
+            
+            <div id="googleLoginButton"></div>
+
+            <div id="loginError" class="alert alert-danger d-none"></div>
+        </div>
+
+        <!-- Cadastro -->
+        <div id="registerSection" class="section d-none">
+            <img src="img/usuario.png" alt="Sistema" class="system-img mx-auto d-block">
+            <h2 class="system-text text-center">Cadastro</h2>
+           <form id="registerForm">
+    <div class="form-group">
+        <input type="text" class="form-control form-control-lg" id="name" placeholder="Nome Completo" required autocomplete="off">
+    </div>
+    <div class="form-group">
+        <input type="email" class="form-control form-control-lg" id="registerEmail" placeholder="E-mail" required autocomplete="off">
+    </div>
+    <div class="form-group">
+        <input type="password" class="form-control form-control-lg" id="registerPassword" placeholder="Senha" required minlength="8" autocomplete="off">
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg btn-block" id="registerButton">Cadastrar</button>
+    <button type="button" class="btn btn-secondary btn-lg btn-block" id="showLoginButton">Fazer Login</button>
+</form>
+            <div id="registerError" class="alert alert-danger d-none"></div>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parse/3.4.2/parse.min.js"></script>
+    <script src="js/index.js"></script>
+   
+</body>
+</html>
